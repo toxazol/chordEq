@@ -1,7 +1,8 @@
 body {
+    touch-action: none;
     font-family: Arial, sans-serif;
-    background-color: #333;
-    color: #fff;
+    background-color: #240750;
+    color: #577B8D;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -27,22 +28,24 @@ body {
   input[type="range"] {
     -webkit-appearance: none;
     width: 300px;
-    height: 20px;
-    background: #ddd;
+    height: 30px;
+    background: #344C64;
     outline: none;
-    border-radius: 10px;
+    border-radius: 30px;
   }
   
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 20px;
-    height: 20px;
-    background: #4CAF50;
+    width: 30px;
+    height: 30px;
+    background: #57A6A1;
     cursor: pointer;
     border-radius: 50%;
   }
 
   #playButton {
+    background-color: #57A6A1;
     margin-bottom: 10px;
+    border-radius: 20px;
   }
