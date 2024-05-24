@@ -33,11 +33,17 @@ body {
   border: none;
   border-radius: 4px;
   font-size: 16px;
+  appearance: none; /* Remove default styling */
+    -webkit-appearance: none; /* Remove default styling in Safari */
+    -moz-appearance: none; /* Remove default styling in Firefox */
 }
 
 .note-select option {
   background-color: #344C64;
   color: #57A6A1;
+  appearance: none; /* Remove default styling */
+    -webkit-appearance: none; /* Remove default styling in Safari */
+    -moz-appearance: none; /* Remove default styling in Firefox */
 }
 
 .slider {
