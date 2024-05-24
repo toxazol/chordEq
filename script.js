@@ -1,81 +1,132 @@
 // Define the note frequencies
 const noteFrequencies = {
-    'A': 220,
-    'C': 261.63,
-    'D': 293.66,
-    'E': 329.63,
-    'G': 392
-  };
-  
-  // Create an audio context
-  let audioContext = null;
-  
-  let isPlaying = false; // Flag to track if notes are playing
+  'C1': 32.70, 'C#1': 34.65, 'D1': 36.71, 'D#1': 38.89, 'E1': 41.20,
+  'F1': 43.65, 'F#1': 46.25, 'G1': 49.00, 'G#1': 51.91, 'A1': 55.00,
+  'A#1': 58.27, 'B1': 61.74, 'C2': 65.41, 'C#2': 69.30, 'D2': 73.42,
+  'D#2': 77.78, 'E2': 82.41, 'F2': 87.31, 'F#2': 92.50, 'G2': 98.00,
+  'G#2': 103.83, 'A2': 110.00, 'A#2': 116.54, 'B2': 123.47, 'C3': 130.81,
+  'C#3': 138.59, 'D3': 146.83, 'D#3': 155.56, 'E3': 164.81, 'F3': 174.61,
+  'F#3': 185.00, 'G3': 196.00, 'G#3': 207.65, 'A3': 220.00, 'A#3': 233.08,
+  'B3': 246.94, 'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13,
+  'E4': 329.63, 'F4': 349.23, 'F#4': 369.99, 'G4': 392.00, 'G#4': 415.30,
+  'A4': 440.00, 'A#4': 466.16, 'B4': 493.88, 'C5': 523.25, 'C#5': 554.37,
+  'D5': 587.33, 'D#5': 622.25, 'E5': 659.26, 'F5': 698.46, 'F#5': 739.99,
+  'G5': 783.99, 'G#5': 830.61, 'A5': 880.00, 'A#5': 932.33, 'B5': 987.77,
+  'C6': 1046.50
+};
 
-  function switchAudioContext() {
-    if (!audioContext) {
+// Create an audio context
+let audioContext = null;
+let isPlaying = false; // Flag to track if notes are playing
+
+function switchAudioContext() {
+  if (!audioContext) {
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
       createOscillators();
       connectSliders();
-    }
-  
-    if (isPlaying) {
+  }
+
+  if (isPlaying) {
       stopNotes(); // Stop the notes if they are currently playing
       playButton.classList.remove('playing'); // Remove the 'playing' class
-    } else {
+  } else {
       playNotes(); // Play the notes if they are not currently playing
       playButton.classList.add('playing'); // Add the 'playing' class
-    }
-  
-    isPlaying = !isPlaying; // Toggle the isPlaying flag
   }
-  
-  // Create oscillators for each note
-  let oscillators = {};
-  function createOscillators() {
-    for (const note in noteFrequencies) {
+
+  isPlaying = !isPlaying; // Toggle the isPlaying flag
+}
+
+// Create oscillators for each note
+let oscillators = {};
+function createOscillators() {
+  for (const note in noteFrequencies) {
       oscillators[note] = audioContext.createOscillator();
       oscillators[note].type = 'sine';
       oscillators[note].frequency.value = noteFrequencies[note];
       oscillators[note].start();
-    }
   }
-  
-  // Get the sliders
-  const sliders = document.querySelectorAll('.slider');
-  
-  // Connect sliders to oscillators
-  function connectSliders() {
-    sliders.forEach(slider => {
-      slider.addEventListener('input', () => {
-        const note = slider.dataset.note;
-        const gain = audioContext.createGain();
-        gain.gain.value = slider.value;
-        oscillators[note].disconnect();
-        oscillators[note].connect(gain);
-        gain.connect(audioContext.destination);
+}
+
+// Get the sliders and note selects
+const sliderContainers = document.querySelectorAll('.slider-container');
+
+// Connect sliders and note selects to oscillators
+function connectSliders() {
+  sliderContainers.forEach((container, index) => {
+      const noteSelect = container.querySelector('.note-select');
+      const slider = container.querySelector('.slider');
+
+      // Populate the note select options
+      for (const note in noteFrequencies) {
+          const option = document.createElement('option');
+          option.value = note;
+          option.text = note;
+          noteSelect.add(option);
+      }
+
+      // Set the default note for the first 5 sliders
+      if (index < 5) {
+          const defaultNotes = ['A4', 'C4', 'D4', 'E4', 'G4'];
+          noteSelect.value = defaultNotes[index];
+      }
+
+      // Store the currently selected note
+      let currentNote = noteSelect.value;
+
+      // Connect the slider to the oscillator
+      noteSelect.addEventListener('change', () => {
+          const selectedNote = noteSelect.value;
+
+          // Disconnect the previous note
+          oscillators[currentNote].disconnect();
+
+          const gain = audioContext.createGain();
+          gain.gain.value = slider.value;
+          oscillators[selectedNote].connect(gain);
+          gain.connect(audioContext.destination);
+
+          // Update the current note
+          currentNote = selectedNote;
       });
-    });
-  }
-  
-  // Play all notes
-  function playNotes() {
-    sliders.forEach(slider => {
-      const note = slider.dataset.note;
-      oscillators[note].disconnect(); // Disconnect the oscillator first
+
+      slider.addEventListener('input', () => {
+          const selectedNote = noteSelect.value;
+
+          // Disconnect the previous note
+          oscillators[selectedNote].disconnect();
+
+          const gain = audioContext.createGain();
+          gain.gain.value = slider.value;
+          oscillators[selectedNote].connect(gain);
+          gain.connect(audioContext.destination);
+      });
+  });
+}
+
+// Play all notes
+function playNotes() {
+  sliderContainers.forEach(container => {
+      const noteSelect = container.querySelector('.note-select');
+      const slider = container.querySelector('.slider');
+      const selectedNote = noteSelect.value;
+
+      // Disconnect the previous note
+      oscillators[selectedNote].disconnect();
+
       const gain = audioContext.createGain();
       gain.gain.value = slider.value;
-      oscillators[note].connect(gain);
+      oscillators[selectedNote].connect(gain);
       gain.connect(audioContext.destination);
-    });
-  }
+  });
+}
 
-  function stopNotes() {
-    for (const note in oscillators) {
+function stopNotes() {
+  for (const note in oscillators) {
       oscillators[note].disconnect();
-    }
   }
-  
-  // the play button"
-  const playButton = document.getElementById('playButton');
-  playButton.addEventListener('click', switchAudioContext);
+}
+
+// Get the play button
+const playButton = document.getElementById('playButton');
+playButton.addEventListener('click', switchAudioContext);
