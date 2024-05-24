@@ -45,7 +45,20 @@ body {
   }
 
   #playButton {
-    background-color: #57A6A1;
     margin-bottom: 10px;
-    border-radius: 20px;
+    border: none;
+    background-color: transparent;
+    font-size: 24px;
+    color: #57A6A1;
+    cursor: pointer;
+  }
+  
+  #playButton::before {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    content: "\f04b"; /* Play icon */
+  }
+  
+  #playButton.playing::before {
+    content: "\f04c"; /* Pause icon */
   }

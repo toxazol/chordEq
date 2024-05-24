@@ -21,8 +21,10 @@ const noteFrequencies = {
   
     if (isPlaying) {
       stopNotes(); // Stop the notes if they are currently playing
+      playButton.classList.remove('playing'); // Remove the 'playing' class
     } else {
       playNotes(); // Play the notes if they are not currently playing
+      playButton.classList.add('playing'); // Add the 'playing' class
     }
   
     isPlaying = !isPlaying; // Toggle the isPlaying flag
