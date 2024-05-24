@@ -51,7 +51,7 @@ const noteFrequencies = {
         gain.gain.value = slider.value;
         oscillators[note].disconnect();
         oscillators[note].connect(gain);
-        // gain.connect(audioContext.destination);
+        gain.connect(audioContext.destination);
       });
     });
   }
