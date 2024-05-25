@@ -30,7 +30,12 @@ function createOscillators() {
         gain.gain.value = defaultGain; // Set the initial gain value
         oscillators[index].connect(gain);
         gain.connect(audioContext.destination);
-        oscillators[index].start();
+        
+        if(!oscillators[index].isStarted) {
+          oscillators[index].start();
+          oscillators[index].isStarted = true;
+        }
+        
         oscillatorButton.classList.add('playing');
       }
     });
