@@ -41,13 +41,13 @@ function addHtmlSliders(count) {
   let rowHtml = `
   <div class="row-container">
     <button class="oscillator-button"></button>
-    <input type="range" min="0" max="${notes.length}" step="1" value="${defaultPitchIndex}" class="slider">
+    <input type="range" min="0" max="${notes.length-1}" step="1" value="${defaultPitchIndex}" class="slider">
+    <div class="slider-val"></div>
   </div>
   `
   while(count--) {
     document.querySelector(".equalizer").innerHTML += rowHtml;
   }
-  
 }
 
 function createOscillators() {
@@ -59,6 +59,7 @@ function createOscillators() {
     oscillators[index] = audioContext.createOscillator();
     oscillators[index].type = 'sine';
     oscillators[index].frequency.value = defaultPitch;
+    drawTextNearSlider(container, "A4");
 
     oscillatorButton.addEventListener('click', () => {
       if (oscillatorButton.classList.contains('playing')) {
@@ -80,7 +81,14 @@ function createOscillators() {
     });
 
     slider.addEventListener('input', () => {
-      oscillators[index].frequency.value = notes[slider.value].freq;
+      let note = notes[slider.value];
+      oscillators[index].frequency.value = note.freq;
+      drawTextNearSlider(container, note.note); 
     });
   });
+}
+
+function drawTextNearSlider(container, value) {
+  const noteVal = container.querySelector('.slider-val');
+  noteVal.innerHTML = value.toString();
 }
