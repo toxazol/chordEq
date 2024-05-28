@@ -13,13 +13,32 @@ const noteFrequencies = {
   'C6': 1046.50
 };
 
-// Create an audio context
+const slidersCount = 8;
+
 let audioContext = null;
-// Flag to track if notes are playing
 let isPlaying = false; 
+
+const waveTypes = {'sine':0, 'square':1, 'sawtooth':2, 'triangle':3};
 
 const playButton = document.getElementById('playButton');
 playButton.addEventListener('click', switchAudioContext);
+
+
+function addHtmlSliders(count) {
+
+  let rowHtml = `
+  <div class="row-container">
+      <select class="note-select"></select>
+      <input type="range" min="0" max="0.1" step="0.001" value="0" class="slider">
+      <select class="wave-select"></select>
+  </div>
+  `
+  while(count--) {
+    document.querySelector(".equalizer").innerHTML += rowHtml;
+  }
+}
+
+addHtmlSliders(slidersCount);
 
 function switchAudioContext() {
   if (!audioContext) {
@@ -53,28 +72,45 @@ function createOscillators() {
 // Get the sliders and note selects
 const rowContainers = document.querySelectorAll('.row-container');
 
+function cycleOptions(selectOption, e) {
+  e.preventDefault();
+  let select = e.target;
+  select.selectedIndex = (select.selectedIndex + 1) % select.options.length;
+  selectOption(select.value);
+}
+
+function populateSelect(select, values) {
+  for (const val in values) {
+    const option = document.createElement('option');
+    option.value = val;
+    option.text = val;
+    select.add(option);
+  }
+}
+
+function switchWave(oscillator, slider, val) {
+  oscillator.type = val;
+}
+
 // Connect sliders and note selects to oscillators
 function connectSliders() {
   rowContainers.forEach((container, index) => {
       const noteSelect = container.querySelector('.note-select');
       const slider = container.querySelector('.slider');
+      const waveSelect = container.querySelector('.wave-select');
 
-      // Populate the note select options
-      for (const note in noteFrequencies) {
-          const option = document.createElement('option');
-          option.value = note;
-          option.text = note;
-          noteSelect.add(option);
-      }
 
-      // Set the default note for the first 5 sliders
-      if (index < 5) {
-          const defaultNotes = ['A3', 'C4', 'D4', 'E4', 'G4'];
-          noteSelect.value = defaultNotes[index];
-      }
+      populateSelect(waveSelect, waveTypes);
+      populateSelect(noteSelect, noteFrequencies);
+
+      // Set the default notes
+      const defaultNotes = ['A3', 'C4', 'D4', 'E4', 'G4', 'A2', 'C3', 'D3'];
+      noteSelect.value = defaultNotes[index];
 
       // Store the currently selected note
       let currentNote = noteSelect.value;
+
+      waveSelect.addEventListener('mousedown', cycleOptions.bind(this, switchWave.bind(this, oscillators[currentNote], slider)));
 
       // Connect the slider to the oscillator
       noteSelect.addEventListener('change', () => {
@@ -86,6 +122,7 @@ function connectSliders() {
           const gain = audioContext.createGain();
           gain.gain.value = slider.value;
           oscillators[selectedNote].connect(gain);
+          oscillators[selectedNote].gainNode = gain;
           gain.connect(audioContext.destination);
 
           // Update the current note
@@ -95,13 +132,8 @@ function connectSliders() {
       slider.addEventListener('input', () => {
           const selectedNote = noteSelect.value;
 
-          // Disconnect the previous note
-          oscillators[selectedNote].disconnect();
-
-          const gain = audioContext.createGain();
+          const gain = oscillators[selectedNote].gainNode;
           gain.gain.value = slider.value;
-          oscillators[selectedNote].connect(gain);
-          gain.connect(audioContext.destination);
       });
   });
 }
@@ -118,6 +150,7 @@ function playNotes() {
       const gain = audioContext.createGain();
       gain.gain.value = slider.value;
       oscillators[selectedNote].connect(gain);
+      oscillators[selectedNote].gainNode = gain;
       gain.connect(audioContext.destination);
   });
 }

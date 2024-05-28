@@ -47,7 +47,7 @@ body {
 input[type="range"] {
   appearance: none;
   -webkit-appearance: none;
-  width: 300px;
+  width: 100vw;
   height: 30px;
   background: #344C64;
   outline: none;
